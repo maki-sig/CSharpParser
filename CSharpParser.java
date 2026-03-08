@@ -3,7 +3,7 @@ class CSharParser {
         System.out.println("\nHello Kinaban");
         print("New way to print");
         print("What is my name");
-        print("My name is John Doe\nI changed a line");
+        print("My name is John Doe\nI changed a line\n");
     }
     private static void print(String text){
         System.out.println(text);
