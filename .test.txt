@@ -1,0 +1,8 @@
+Safe push:
+	1. Create new branch
+	2. Checkout new branch
+	3. add changes -> commit changes
+	4. pull origin main
+	5. push origin 'new branch'
+
+do this to push changes safely thru pull request
