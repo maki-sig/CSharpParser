@@ -4,10 +4,11 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-class CSharpScanner {
+public class projectreqt3_BOTIS_PADRINAO {
     private String source;
     private int cursor = 0;
     private int line = 1;
+    private boolean hadError = false;
 
     // C# Keywords
     private static final List<String> KEYWORDS = Arrays.asList(
@@ -23,7 +24,7 @@ class CSharpScanner {
             "true", "try", "typeof", "uint", "ulong", "unchecked", "unsafe",
             "ushort", "using", "virtual", "void", "volatile", "while");
 
-    public CSharpScanner(String source) {
+    public projectreqt3_BOTIS_PADRINAO(String source) {
         this.source = source;
     }
 
@@ -76,26 +77,54 @@ class CSharpScanner {
 
                 // Multi-character Operators
                 case '+':
-                    addToken("PLUS", "+");
+                    if (match('+'))
+                        addToken("PLUS_PLUS", "++");
+                    else
+                        addToken("PLUS", "+");
                     break;
                 case '-':
-                    addToken("MINUS", "-");
+                    if (match('-'))
+                        addToken("MINUS_MINUS", "--");
+                    else
+                        addToken("MINUS", "-");
                     break;
                 case '*':
                     addToken("STAR", "*");
                     break;
-                case '=':
-                    addToken(match('=') ? "EQUAL_EQUAL" : "EQUAL", match('=') ? "==" : "=");
+                case '=': {
+                    boolean isEq = match('=');
+                    addToken(isEq ? "EQUAL_EQUAL" : "EQUAL", isEq ? "==" : "=");
                     break;
-                case '!':
-                    addToken(match('=') ? "BANG_EQUAL" : "BANG", match('=') ? "!=" : "!");
+                }
+                case '!': {
+                    boolean isEq = match('=');
+                    addToken(isEq ? "BANG_EQUAL" : "BANG", isEq ? "!=" : "!");
                     break;
-                case '<':
-                    addToken(match('=') ? "LESS_EQUAL" : "LESS", match('=') ? "<=" : "<");
+                }
+                case '<': {
+                    boolean isEq = match('=');
+                    addToken(isEq ? "LESS_EQUAL" : "LESS", isEq ? "<=" : "<");
                     break;
-                case '>':
-                    addToken(match('=') ? "GREATER_EQUAL" : "GREATER", match('=') ? ">=" : ">");
+                }
+                case '>': {
+                    boolean isEq = match('=');
+                    addToken(isEq ? "GREATER_EQUAL" : "GREATER", isEq ? ">=" : ">");
                     break;
+                }
+                case '&': {
+                    if (match('&'))
+                        addToken("LOGICAL_AND", "&&");
+                    else
+                        addToken("BITWISE_AND", "&");
+                    break;
+                }
+                case '|': {
+                    if (match('|'))
+                        addToken("LOGICAL_OR", "||");
+                    else
+                        addToken("BITWISE_OR", "|");
+                    break;
+                }
 
                 // Comments and Slash
                 case '/':
@@ -118,16 +147,22 @@ class CSharpScanner {
 
                 default:
                     if (isDigit(c)) {
-                        consumeNumber();
+                        consumeNumber(c);
                     } else if (isAlpha(c)) {
-                        consumeIdentifier();
+                        consumeIdentifier(c);
                     } else {
                         System.err.println("[Error] Line " + line + ": Illegal character '" + c + "'");
+                        System.err.println("--- SCAN HALTED DUE TO ERROR ---");
+                        hadError = true;
+                        return; // Halt on invalid sequence
                     }
                     break;
             }
         }
-        System.out.println("--- SCAN COMPLETE ---");
+
+        if (!hadError) {
+            System.out.println("--- SCAN COMPLETE ---");
+        }
     }
 
     private void consumeString() {
@@ -140,11 +175,13 @@ class CSharpScanner {
 
         if (isAtEnd()) {
             System.err.println("[Error] Line " + line + ": Unterminated string.");
+            System.err.println("--- SCAN HALTED DUE TO ERROR ---");
+            hadError = true;
             return;
         }
 
         advance(); // The closing "
-        addToken("STRING_LITERAL", val.toString());
+        addToken("STRING_LITERAL", "\"" + val.toString() + "\"");
     }
 
     private void consumeBlockComment() {
@@ -159,11 +196,13 @@ class CSharpScanner {
             advance();
         }
         System.err.println("[Error] Line " + line + ": Unterminated block comment.");
+        System.err.println("--- SCAN HALTED DUE TO ERROR ---");
+        hadError = true;
     }
 
-    private void consumeNumber() {
+    private void consumeNumber(char firstDigit) {
         StringBuilder val = new StringBuilder();
-        val.append(source.charAt(cursor - 1));
+        val.append(firstDigit);
         while (isDigit(peek()))
             val.append(advance());
 
@@ -176,9 +215,9 @@ class CSharpScanner {
         addToken("NUMBER_LITERAL", val.toString());
     }
 
-    private void consumeIdentifier() {
+    private void consumeIdentifier(char firstChar) {
         StringBuilder val = new StringBuilder();
-        val.append(source.charAt(cursor - 1));
+        val.append(firstChar);
         while (isAlphaNumeric(peek()))
             val.append(advance());
 
@@ -189,7 +228,7 @@ class CSharpScanner {
 
     // Helpers
     private boolean isAtEnd() {
-        return cursor >= source.length();
+        return cursor >= source.length() || hadError;
     }
 
     private char advance() {
@@ -229,9 +268,8 @@ class CSharpScanner {
 
     public static void main(String[] args) {
         try {
-            // Replace with your actual path
-            String content = Files.readString(Paths.get("projectreqt3_SURNAME1_SURNAME2_input.cs"));
-            CSharpScanner scanner = new CSharpScanner(content);
+            String content = Files.readString(Paths.get("../projectreqt3_SURNAME1_SURNAME2_input.cs"));
+            projectreqt3_BOTIS_PADRINAO scanner = new projectreqt3_BOTIS_PADRINAO(content);
             scanner.scan();
         } catch (IOException e) {
             System.err.println("Could not read file: " + e.getMessage());
