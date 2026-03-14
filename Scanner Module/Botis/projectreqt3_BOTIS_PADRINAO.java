@@ -10,7 +10,7 @@ public class projectreqt3_BOTIS_PADRINAO {
     private int line = 1;
     private boolean hadError = false;
 
-    // C# Keywords
+    // c# keywords
     private static final List<String> KEYWORDS = Arrays.asList(
             "abstract", "as", "base", "bool", "break", "byte", "case", "catch",
             "char", "checked", "class", "const", "continue", "decimal", "default",
@@ -29,12 +29,12 @@ public class projectreqt3_BOTIS_PADRINAO {
     }
 
     public void scan() {
-        System.out.println("--- STARTING SCAN ---");
+        System.out.println("STARTING SCAN:\n");
         while (!isAtEnd()) {
             char c = advance();
 
             switch (c) {
-                // Whitespace
+                // whitespace
                 case ' ':
                 case '\r':
                 case '\t':
@@ -43,7 +43,7 @@ public class projectreqt3_BOTIS_PADRINAO {
                     line++;
                     break;
 
-                // Single-character Operators/Punctuation
+                // single-character operators/punctuation
                 case '(':
                     addToken("LEFT_PAREN", "(");
                     break;
@@ -75,7 +75,7 @@ public class projectreqt3_BOTIS_PADRINAO {
                     addToken("COLON", ":");
                     break;
 
-                // Multi-character Operators
+                // multi-character operators
                 case '+':
                     if (match('+'))
                         addToken("PLUS_PLUS", "++");
@@ -126,21 +126,21 @@ public class projectreqt3_BOTIS_PADRINAO {
                     break;
                 }
 
-                // Comments and Slash
+                // comments and slash
                 case '/':
                     if (match('/')) {
-                        // Single line comment: Consume until end of line
+                        // single line comment: consume until end of line
                         while (peek() != '\n' && !isAtEnd())
                             advance();
                     } else if (match('*')) {
-                        // Block comment
+                        // block comment
                         consumeBlockComment();
                     } else {
                         addToken("SLASH", "/");
                     }
                     break;
 
-                // String Literals
+                // string literals
                 case '"':
                     consumeString();
                     break;
@@ -152,16 +152,16 @@ public class projectreqt3_BOTIS_PADRINAO {
                         consumeIdentifier(c);
                     } else {
                         System.err.println("[Error] Line " + line + ": Illegal character '" + c + "'");
-                        System.err.println("--- SCAN HALTED DUE TO ERROR ---");
+                        System.err.println("\nSCAN HALTED DUE TO ERROR");
                         hadError = true;
-                        return; // Halt on invalid sequence
+                        return; // halt on invalid sequence
                     }
                     break;
             }
         }
 
         if (!hadError) {
-            System.out.println("--- SCAN COMPLETE ---");
+            System.out.println("\nSCAN COMPLETE");
         }
     }
 
@@ -180,7 +180,7 @@ public class projectreqt3_BOTIS_PADRINAO {
             return;
         }
 
-        advance(); // The closing "
+        advance(); // the closing "
         addToken("STRING_LITERAL", "\"" + val.toString() + "\"");
     }
 
@@ -206,9 +206,9 @@ public class projectreqt3_BOTIS_PADRINAO {
         while (isDigit(peek()))
             val.append(advance());
 
-        // Handle decimals
+        // handle decimals
         if (peek() == '.' && isDigit(peekNext())) {
-            val.append(advance()); // Consume '.'
+            val.append(advance()); // consume '.'
             while (isDigit(peek()))
                 val.append(advance());
         }
@@ -226,7 +226,7 @@ public class projectreqt3_BOTIS_PADRINAO {
         addToken(type, text);
     }
 
-    // Helpers
+    // helpers
     private boolean isAtEnd() {
         return cursor >= source.length() || hadError;
     }
