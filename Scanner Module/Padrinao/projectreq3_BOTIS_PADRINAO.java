@@ -1,3 +1,6 @@
+// finished scanner class for C# as of March 15
+// compiled by: Crisler Annilov B. Padrinao
+
 import java.io.*;
 import java.util.*;
 
