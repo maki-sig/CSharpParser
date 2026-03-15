@@ -18,9 +18,9 @@ public class projectreq3_BOTIS_PADRINAO {
         int line;
 
         Token(TokenType type, String value, int line) {
-            this.type  = type;
+            this.type = type;
             this.value = value;
-            this.line  = line;
+            this.line = line;
         }
 
         @Override
@@ -31,38 +31,35 @@ public class projectreq3_BOTIS_PADRINAO {
 
     // C# reserved words
     static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-        "abstract","as","base","bool","break","byte","case","catch","char",
-        "checked","class","const","continue","decimal","default","delegate",
-        "do","double","else","enum","event","explicit","extern","false",
-        "finally","fixed","float","for","foreach","goto","if","implicit",
-        "in","int","interface","internal","is","lock","long","namespace",
-        "new","null","object","operator","out","override","params","private",
-        "protected","public","readonly","ref","return","sbyte","sealed",
-        "short","sizeof","stackalloc","static","string","struct","switch",
-        "this","throw","true","try","typeof","uint","ulong","unchecked",
-        "unsafe","ushort","using","virtual","void","volatile","while","var",
-        "async","await","yield","get","set","value","add","remove","partial",
-        "dynamic","record","init","with","nint","nuint","and","or","not"
-    ));
+            "abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char",
+            "checked", "class", "const", "continue", "decimal", "default", "delegate",
+            "do", "double", "else", "enum", "event", "explicit", "extern", "false",
+            "finally", "fixed", "float", "for", "foreach", "goto", "if", "implicit",
+            "in", "int", "interface", "internal", "is", "lock", "long", "namespace",
+            "new", "null", "object", "operator", "out", "override", "params", "private",
+            "protected", "public", "readonly", "ref", "return", "sbyte", "sealed",
+            "short", "sizeof", "stackalloc", "static", "string", "struct", "switch",
+            "this", "throw", "true", "try", "typeof", "uint", "ulong", "unchecked",
+            "unsafe", "ushort", "using", "virtual", "void", "volatile", "while", "var",
+            "async", "await", "yield", "get", "set", "value", "add", "remove", "partial",
+            "dynamic", "record", "init", "with", "nint", "nuint", "and", "or", "not"));
 
     // Multi-char operators are checked before single-char ones
     static final String[] MULTI_OPS = {
-        "<<=",">>=","??=","?.","?[",
-        "++","--","&&","||","??","==","!=","<=",">=",
-        "<<",">>","+=","-=","*=","/=","%=","&=","|=","^=",
-        "=>","->"
+            "<<=", ">>=", "??=", "?.", "?[",
+            "++", "--", "&&", "||", "??", "==", "!=", "<=", ">=",
+            "<<", ">>", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=",
+            "=>", "->"
     };
 
     static final Set<Character> SINGLE_OPS = new HashSet<>(Arrays.asList(
-        '+','-','*','/','%','=','<','>','!','&','|','^','~','?'
-    ));
+            '+', '-', '*', '/', '%', '=', '<', '>', '!', '&', '|', '^', '~', '?'));
 
     static final Set<Character> DELIMITERS = new HashSet<>(Arrays.asList(
-        '(',')','{','}','[',']',';',',','.', ':'
-    ));
+            '(', ')', '{', '}', '[', ']', ';', ',', '.', ':'));
 
     private final String src;
-    private int pos  = 0;
+    private int pos = 0;
     private int line = 1;
 
     projectreq3_BOTIS_PADRINAO(String src) {
@@ -92,7 +89,8 @@ public class projectreq3_BOTIS_PADRINAO {
 
         while (!atEnd()) {
             skipWhitespaceAndComments();
-            if (atEnd()) break;
+            if (atEnd())
+                break;
 
             int tokenLine = line;
             char c = current();
@@ -116,7 +114,7 @@ public class projectreq3_BOTIS_PADRINAO {
                 char bad = advance();
                 if (!String.valueOf(bad).isBlank()) {
                     tokens.add(new Token(TokenType.ILLEGAL,
-                        "Illegal character '" + bad + "' (ASCII " + (int) bad + ")", tokenLine));
+                            "Illegal character '" + bad + "' (ASCII " + (int) bad + ")", tokenLine));
                 }
             }
         }
@@ -266,7 +264,7 @@ public class projectreq3_BOTIS_PADRINAO {
         }
 
         return new Token(isFloat ? TokenType.FLOAT_LITERAL : TokenType.INTEGER_LITERAL,
-                         sb.toString(), tokenLine);
+                sb.toString(), tokenLine);
     }
 
     // Reads a word then decides if it's a keyword, bool, null, or identifier
@@ -314,13 +312,14 @@ public class projectreq3_BOTIS_PADRINAO {
 
     public static void main(String[] args) {
 
-        // String filePath = "D:\\VS Code Works\\Java\\PL_Final Project\\CSharpParser\\Scanner Module\\projectreq3_BOTIS_PADRINAO_input.cs";
+        // String filePath = "D:\\VS Code Works\\Java\\PL_Final
+        // Project\\CSharpParser\\Scanner Module\\projectreq3_BOTIS_PADRINAO_input.cs";
 
         String source = "";
         try {
             StringBuilder sb = new StringBuilder();
             BufferedReader br = new BufferedReader(new FileReader(
-                "D:\\Programming\\VS Code Works\\Java\\PL_Final Project\\CSharpParser\\Scanner Module\\projectreq3_BOTIS_PADRINAO_input.cs"));
+                    "../projectreq3_BOTIS_PADRINAO_input.cs"));
             String ln;
             while ((ln = br.readLine()) != null) {
                 sb.append(ln).append('\n');
