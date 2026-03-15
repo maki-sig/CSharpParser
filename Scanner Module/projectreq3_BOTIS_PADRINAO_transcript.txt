@@ -1,283 +1,5 @@
 BOTIS CODE:
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-
-public class projectreqt3_BOTIS_PADRINAO {
-    private String source;
-    private int cursor = 0;
-    private int line = 1;
-    private boolean hadError = false;
-
-    // c# keywords
-    private static final List<String> KEYWORDS = Arrays.asList(
-            "abstract", "as", "base", "bool", "break", "byte", "case", "catch",
-            "char", "checked", "class", "const", "continue", "decimal", "default",
-            "delegate", "do", "double", "else", "enum", "event", "explicit",
-            "extern", "false", "finally", "fixed", "float", "for", "foreach",
-            "goto", "if", "implicit", "in", "int", "interface", "internal", "is",
-            "lock", "long", "namespace", "new", "null", "object", "operator",
-            "out", "override", "params", "private", "protected", "public",
-            "readonly", "ref", "return", "sbyte", "sealed", "short", "sizeof",
-            "stackalloc", "static", "string", "struct", "switch", "this", "throw",
-            "true", "try", "typeof", "uint", "ulong", "unchecked", "unsafe",
-            "ushort", "using", "virtual", "void", "volatile", "while");
-
-    public projectreqt3_BOTIS_PADRINAO(String source) {
-        this.source = source;
-    }
-
-    public void scan() {
-        System.out.println("STARTING SCAN:\n");
-        while (!isAtEnd()) {
-            char c = advance();
-
-            switch (c) {
-                // whitespace
-                case ' ':
-                case '\r':
-                case '\t':
-                    break;
-                case '\n':
-                    line++;
-                    break;
-
-                // single-character operators/punctuation
-                case '(':
-                    addToken("LEFT_PAREN", "(");
-                    break;
-                case ')':
-                    addToken("RIGHT_PAREN", ")");
-                    break;
-                case '{':
-                    addToken("LEFT_BRACE", "{");
-                    break;
-                case '}':
-                    addToken("RIGHT_BRACE", "}");
-                    break;
-                case '[':
-                    addToken("LEFT_BRACKET", "[");
-                    break;
-                case ']':
-                    addToken("RIGHT_BRACKET", "]");
-                    break;
-                case ',':
-                    addToken("COMMA", ",");
-                    break;
-                case '.':
-                    addToken("DOT", ".");
-                    break;
-                case ';':
-                    addToken("SEMICOLON", ";");
-                    break;
-                case ':':
-                    addToken("COLON", ":");
-                    break;
-
-                // multi-character operators
-                case '+':
-                    if (match('+'))
-                        addToken("PLUS_PLUS", "++");
-                    else
-                        addToken("PLUS", "+");
-                    break;
-                case '-':
-                    if (match('-'))
-                        addToken("MINUS_MINUS", "--");
-                    else
-                        addToken("MINUS", "-");
-                    break;
-                case '*':
-                    addToken("STAR", "*");
-                    break;
-                case '=': {
-                    boolean isEq = match('=');
-                    addToken(isEq ? "EQUAL_EQUAL" : "EQUAL", isEq ? "==" : "=");
-                    break;
-                }
-                case '!': {
-                    boolean isEq = match('=');
-                    addToken(isEq ? "BANG_EQUAL" : "BANG", isEq ? "!=" : "!");
-                    break;
-                }
-                case '<': {
-                    boolean isEq = match('=');
-                    addToken(isEq ? "LESS_EQUAL" : "LESS", isEq ? "<=" : "<");
-                    break;
-                }
-                case '>': {
-                    boolean isEq = match('=');
-                    addToken(isEq ? "GREATER_EQUAL" : "GREATER", isEq ? ">=" : ">");
-                    break;
-                }
-                case '&': {
-                    if (match('&'))
-                        addToken("LOGICAL_AND", "&&");
-                    else
-                        addToken("BITWISE_AND", "&");
-                    break;
-                }
-                case '|': {
-                    if (match('|'))
-                        addToken("LOGICAL_OR", "||");
-                    else
-                        addToken("BITWISE_OR", "|");
-                    break;
-                }
-
-                // comments and slash
-                case '/':
-                    if (match('/')) {
-                        // single line comment: consume until end of line
-                        while (peek() != '\n' && !isAtEnd())
-                            advance();
-                    } else if (match('*')) {
-                        // block comment
-                        consumeBlockComment();
-                    } else {
-                        addToken("SLASH", "/");
-                    }
-                    break;
-
-                // string literals
-                case '"':
-                    consumeString();
-                    break;
-
-                default:
-                    if (isDigit(c)) {
-                        consumeNumber(c);
-                    } else if (isAlpha(c)) {
-                        consumeIdentifier(c);
-                    } else {
-                        System.err.println("[Error] Line " + line + ": Illegal character '" + c + "'");
-                        System.err.println("\nSCAN HALTED DUE TO ERROR");
-                        hadError = true;
-                        return; // halt on invalid sequence
-                    }
-                    break;
-            }
-        }
-
-        if (!hadError) {
-            System.out.println("\nSCAN COMPLETE");
-        }
-    }
-
-    private void consumeString() {
-        StringBuilder val = new StringBuilder();
-        while (peek() != '"' && !isAtEnd()) {
-            if (peek() == '\n')
-                line++;
-            val.append(advance());
-        }
-
-        if (isAtEnd()) {
-            System.err.println("[Error] Line " + line + ": Unterminated string.");
-            System.err.println("--- SCAN HALTED DUE TO ERROR ---");
-            hadError = true;
-            return;
-        }
-
-        advance(); // the closing "
-        addToken("STRING_LITERAL", "\"" + val.toString() + "\"");
-    }
-
-    private void consumeBlockComment() {
-        while (!isAtEnd()) {
-            if (peek() == '*' && peekNext() == '/') {
-                advance(); // consume '*'
-                advance(); // consume '/'
-                return;
-            }
-            if (peek() == '\n')
-                line++;
-            advance();
-        }
-        System.err.println("[Error] Line " + line + ": Unterminated block comment.");
-        System.err.println("--- SCAN HALTED DUE TO ERROR ---");
-        hadError = true;
-    }
-
-    private void consumeNumber(char firstDigit) {
-        StringBuilder val = new StringBuilder();
-        val.append(firstDigit);
-        while (isDigit(peek()))
-            val.append(advance());
-
-        // handle decimals
-        if (peek() == '.' && isDigit(peekNext())) {
-            val.append(advance()); // consume '.'
-            while (isDigit(peek()))
-                val.append(advance());
-        }
-        addToken("NUMBER_LITERAL", val.toString());
-    }
-
-    private void consumeIdentifier(char firstChar) {
-        StringBuilder val = new StringBuilder();
-        val.append(firstChar);
-        while (isAlphaNumeric(peek()))
-            val.append(advance());
-
-        String text = val.toString();
-        String type = KEYWORDS.contains(text) ? "KEYWORD" : "IDENTIFIER";
-        addToken(type, text);
-    }
-
-    // helpers
-    private boolean isAtEnd() {
-        return cursor >= source.length() || hadError;
-    }
-
-    private char advance() {
-        return source.charAt(cursor++);
-    }
-
-    private char peek() {
-        return isAtEnd() ? '\0' : source.charAt(cursor);
-    }
-
-    private char peekNext() {
-        return (cursor + 1 >= source.length()) ? '\0' : source.charAt(cursor + 1);
-    }
-
-    private boolean match(char expected) {
-        if (isAtEnd() || source.charAt(cursor) != expected)
-            return false;
-        cursor++;
-        return true;
-    }
-
-    private boolean isDigit(char c) {
-        return c >= '0' && c <= '9';
-    }
-
-    private boolean isAlpha(char c) {
-        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
-    }
-
-    private boolean isAlphaNumeric(char c) {
-        return isAlpha(c) || isDigit(c);
-    }
-
-    private void addToken(String type, String lexeme) {
-        System.out.printf("[%s] : %s\n", type, lexeme);
-    }
-
-    public static void main(String[] args) {
-        try {
-            String content = Files.readString(Paths.get("../projectreqt3_SURNAME1_SURNAME2_input.cs"));
-            projectreqt3_BOTIS_PADRINAO scanner = new projectreqt3_BOTIS_PADRINAO(content);
-            scanner.scan();
-        } catch (IOException e) {
-            System.err.println("Could not read file: " + e.getMessage());
-        }
-    }
-}
+Scanner Module\Botis\projectreqt3_BOTIS_PADRINAO.java
 
 BOTIS' APPROACH: 
 
@@ -293,18 +15,53 @@ them as keywords, numbers, or strings based on C# rules.
 
 -------------------------------------------------------------------------------------------------------------------------
 
-CRISLER CODE:
+PADRINAO CODE:
+Scanner Module\Padrinao\projectreq3_BOTIS_PADRINAO.java
 
-insert here
+PADRINAO's APPROACH:
 
-CRISLER'S APPROACH:
+Padrinao created a scanner that reasds the source code and separes the tex into different tokens.
 
-insert here
+Each token is stored with its type, value, and the line number where it was found.
+
+The program first removes all spaces and comments, including single-line (//) and multi-line (/* ... */) comments.
+
+After that, the scanner checks the remaining text and identifies keywords, identifiers, numbers, strings, characters, operators, and delimiters.
+
+The program checks longer operators first before checking single symbols to make sure they are recognized correctly.
+
+If the scanner finds a symbol that does not belong to the language rules, it marks it as an illegal token and shows the line where it occurred.
 
 -------------------------------------------------------------------------------------------------------------------------
 
 DECISION POINT (which code to submit):
+After reviewing both implementations, the group decided to submit PADRINAO's scanner implementation.
+
+location: Scanner Module\Padrinao\projectreq3_BOTIS_PADRINAO.java
 
 REASON:
+Both codes were able to correctly identify tokens and remove comments and spaces from the source code.
+The scanner programs were tested on OneCompiler.com to measure execution time and memory usage.
 
+Test results for PADRINAO's code:
+First test: 26ms, 41.4MB
+Second test: 26ms, 41.3MB
+Third test: 25ms, 41.1MB
+Fourth test: 22ms, 41.3MB
+Fifth test: 22ms, 40.8MB
+---------------------------------
+Average: 24.2ms, 41.18MB
+
+Test results for BOTIS' code:
+First test: 27ms, 41.4MB
+Second test: 24ms, 41.2MB
+Third test: 24ms, 41.4MB
+Fourth test: 23ms, 41.4MB
+Fifth test: 26ms, 41.4MB
+------------------------------------------
+Average: 24.8ms, 41.36MB
+
+PADRINAO's code showed slightly more consistent performance across the five tests.
+PADRINAO's implementation also organizes tokens using a class that stores the token type, value, and line number, making the output easier to read and understand.
+Because of the clearer structure and stable performance, the group agreed that PADRINAO's code would be more suitable for the final submission.
 -------------------------------------------------------------------------------------------------------------------------
