@@ -320,7 +320,7 @@ public class projectreq3_BOTIS_PADRINAO {
         try {
             StringBuilder sb = new StringBuilder();
             BufferedReader br = new BufferedReader(new FileReader(
-                "D:\\VS Code Works\\Java\\PL_Final Project\\CSharpParser\\Scanner Module\\projectreq3_BOTIS_PADRINAO_input.cs"));
+                "D:\\Programming\\VS Code Works\\Java\\PL_Final Project\\CSharpParser\\Scanner Module\\projectreq3_BOTIS_PADRINAO_input.cs"));
             String ln;
             while ((ln = br.readLine()) != null) {
                 sb.append(ln).append('\n');
